@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pa">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wingo AI Pro</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101713;color:#f4fff7;font-family:Arial,sans-serif;padding:18px}
+.wrap{max-width:520px;margin:auto}.brand{color:#54e58e;font-size:25px;font-weight:800;letter-spacing:1px}
+.sub{color:#9eb5a6;margin:5px 0 20px}.panel{background:#1b2921;border:1px solid #304b39;border-radius:16px;padding:16px;margin:14px 0}
+h2{font-size:16px;margin:0 0 12px}.big{font-size:32px;font-weight:800;color:#54e58e}.muted{color:#a9b8ae;font-size:13px}
+input{width:100%;padding:13px;border-radius:10px;border:1px solid #42614b;background:#101713;color:white;font-size:18px}
+button{background:#54e58e;color:#102016;border:0;padding:13px 16px;border-radius:10px;font-weight:700;width:100%;margin-top:10px;font-size:15px}
+.row{display:flex;gap:10px}.row>*{flex:1}.stat{background:#25382b;border-radius:12px;padding:14px}.stat b{font-size:24px;color:#54e58e}
+li{padding:8px 0;border-bottom:1px solid #2d4033;font-size:14px}.warn{font-size:12px;line-height:1.5;color:#d5c9a1}
+</style></head>
+<body><div class="wrap">
+<div class="brand">WINGO AI PRO</div><div class="sub">1 Minute · BIG / SMALL Analyzer</div>
+<div class="panel"><h2>Latest analysis</h2><div id="prediction" class="big">NO PREDICTION</div><div id="confidence" class="muted">ਘੱਟੋ-ਘੱਟ 10 ਨਤੀਜੇ ਜੋੜੋ</div>
+<div class="row" style="margin-top:14px"><div class="stat"><b id="bp">--</b><div class="muted">BIG frequency</div></div><div class="stat"><b id="sp">--</b><div class="muted">SMALL frequency</div></div></div></div>
+<div class="panel"><h2>ਨਵਾਂ Result ਜੋੜੋ</h2><input id="num" type="number" min="0" max="9" placeholder="0 ਤੋਂ 9 ਤੱਕ ਨੰਬਰ"><button onclick="addResult()">SAVE RESULT</button><div class="muted" style="margin-top:8px">BIG = 5–9 · SMALL = 0–4</div></div>
+<div class="panel"><h2>Result history <span class="muted" id="count"></span></h2><ul id="history"></ul><button onclick="clearData()" style="background:#39483e;color:white">CLEAR HISTORY</button></div>
+<div class="panel warn"><b>ਜ਼ਰੂਰੀ ਨੋਟ:</b> ਇਹ ਪਹਿਲਾ APK ਪ੍ਰੋਟੋਟਾਈਪ ਹੈ। ਇਸ ਵਿੱਚ ਨਤੀਜੇ ਹੱਥੀਂ ਦਰਜ ਹੁੰਦੇ ਹਨ। ਦਿੱਤੀ Website ਲਈ ਕੋਈ ਪੁਸ਼ਟੀਸ਼ੁਦਾ ਅਧਿਕਾਰਤ live-results API ਨਹੀਂ ਮਿਲੀ, ਇਸ ਲਈ Automatic fetching ਹਾਲੇ ਜੋੜੀ ਨਹੀਂ ਗਈ। ਪਿਛਲੇ ਨਤੀਜੇ ਅਗਲਾ ਨਤੀਜਾ ਪੱਕਾ ਨਹੀਂ ਦੱਸਦੇ। 80% accuracy ਦੀ ਗਾਰੰਟੀ ਨਹੀਂ ਹੈ। ਪੈਸੇ ਲਗਾਉਣ ਲਈ ਇਸਨੂੰ ਭਰੋਸੇਯੋਗ ਸੰਕੇਤ ਨਾ ਮੰਨੋ।</div>
+</div>
+<script>
+let data=JSON.parse(localStorage.getItem('wingoResults')||'[]');
+function save(){localStorage.setItem('wingoResults',JSON.stringify(data));render()}
+function addResult(){let v=Number(document.getElementById('num').value);if(!Number.isInteger(v)||v<0||v>9){alert('0 ਤੋਂ 9 ਤੱਕ ਨੰਬਰ ਪਾਓ');return}data.unshift({n:v,t:new Date().toLocaleString()});data=data.slice(0,500);document.getElementById('num').value='';save()}
+function render(){
+ const big=data.filter(x=>x.n>=5).length, small=data.length-big;
+ document.getElementById('bp').textContent=data.length?Math.round(big/data.length*100)+'%':'--';
+ document.getElementById('sp').textContent=data.length?Math.round(small/data.length*100)+'%':'--';
+ document.getElementById('count').textContent='('+data.length+')';
+ const p=document.getElementById('prediction'), c=document.getElementById('confidence');
+ if(data.length<10){p.textContent='NO PREDICTION';c.textContent='ਘੱਟੋ-ਘੱਟ 10 ਨਤੀਜੇ ਜੋੜੋ';}
+ else if(big===small){p.textContent='NO CLEAR EDGE';c.textContent='ਇਤਿਹਾਸ ਵਿੱਚ ਦੋਵੇਂ ਬਰਾਬਰ ਹਨ';}
+ else {p.textContent='HISTORICAL LEAN: '+(big>small?'BIG':'SMALL');c.textContent='ਇਹ ਸਿਰਫ਼ ਪੁਰਾਣੇ ਡਾਟੇ ਦੀ frequency ਹੈ, ਅਗਲੇ ਨਤੀਜੇ ਦੀ prediction ਨਹੀਂ।';}
+ document.getElementById('history').innerHTML=data.slice(0,30).map(x=>'<li>Number <b>'+x.n+'</b> · '+(x.n>=5?'BIG':'SMALL')+' <span class="muted">· '+x.t+'</span></li>').join('')||'<li>ਹਾਲੇ ਕੋਈ result ਨਹੀਂ</li>';
+}
+function clearData(){if(confirm('ਸਾਰਾ history ਮਿਟਾਉਣਾ ਹੈ?')){data=[];save()}}
+render();
+</script></body></html>
